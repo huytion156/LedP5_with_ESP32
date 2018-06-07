@@ -8,6 +8,10 @@
 
 <img src="https://imgur.com/RkC5GB6.png">
 
+Các chân pin sẽ bị đảo chiều theo hình: 
+
+<img src="https://i.imgur.com/GspE03y.png">
+
 **3. Nối chân pin bảng LED với ESP32 theo sơ đồ sau:**
 
 |Bảng LED P5 | ESP32|
