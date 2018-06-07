@@ -20,4 +20,8 @@ R2  -> 13
 G2  -> 2
 B2  -> 15
 
+Hàn mạch theo sơ đồ: 
+
+<img src="https://imgur.com/a/dvWHmsu"> 
+
 4. Tải thư viện tại https://github.com/VGottselig/ESP32-RGB-Matrix-Display.git
