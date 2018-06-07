@@ -6,7 +6,7 @@
 
 **2. Gắn dây 16 Pin vào input**
 
-<img src="https://imgur.com/RkC5GB6">
+<img src="https://imgur.com/RkC5GB6.png">
 
 **3. Nối chân pin bảng LED với ESP32 theo sơ đồ sau:**
 
