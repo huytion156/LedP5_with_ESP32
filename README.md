@@ -20,6 +20,12 @@ R2  -> 13
 G2  -> 2
 B2  -> 15
 
+|Cột 2 | Cột 3|
+|------|------|
+| 2 x 3| 2 x 4|
+| 3 x 3| 3 x 4|
+| 4 x 3| 4 x 4|
+
 Hàn mạch theo sơ đồ: 
 
 <img src="https://i.imgur.com/qFTazNE.png"> 
