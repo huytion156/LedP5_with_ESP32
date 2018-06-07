@@ -1,8 +1,11 @@
 # LedP5_with_ESP32 
 
 **1. Xác định Input và Output của bảng LED: dựa vào chiều mũi tên, mũi tên chỉ từ input sang output** 
+
 <img src="https://i.imgur.com/cagovdg.png">
+
 **2. Gắn dây 16 Pin vào input**
+
 **3. Nối chân pin bảng LED với ESP32 theo sơ đồ sau:**
 
 |Bảng LED P5 | ESP32|
