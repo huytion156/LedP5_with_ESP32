@@ -35,5 +35,7 @@ Hàn mạch theo sơ đồ:
 <img src="https://i.imgur.com/qFTazNE.png"> 
 
 **4. Tải thư viện tại** 
+
 Thư viện LED: https://github.com/VGottselig/ESP32-RGB-Matrix-Display.git
+
 Thư viện WiFi Manager cho ESP32: https://github.com/zhouhan0126/WIFIMANAGER-ESP32
