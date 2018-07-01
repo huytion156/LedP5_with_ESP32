@@ -1,27 +1,27 @@
+#include "EEPROM.h"
 #include <ArduinoJson.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "Adafruit_GFX.h"
 #include "ESP32RGBmatrixPanel.h"
 #include <HTTPClient.h>
-#if defined(ESP8266)
-#include <ESP8266WiFi.h>
-#else
-#include <WiFi.h>
-#endif
 
+#include <WiFi.h>
 
 #include <DNSServer.h>
-#if defined(ESP8266)
-#include <ESP8266WebServer.h>
-#else
 #include <WebServer.h>
-#endif
 #include <WiFiManager.h>
+
+
+
+String serverCMI = "192.168.1.56";
+
+WebServer server(80);
 
 /*Khai bao Wifi*/
 const char* ssid = "CMA";
 const char* pass = "cma2018LHP515";
+
 
 
 //G1  R1 |
@@ -66,6 +66,25 @@ void IRAM_ATTR onDisplayUpdate() {
   matrix.update();
 }
 
+void handleRoot() {
+  server.send(200, "text/plain", "hello from esp32! host=" +  serverCMI);
+}
+
+void handleNotFound() {
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  for (uint8_t i = 0; i < server.args(); i++) {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+  server.send(404, "text/plain", message);
+}
+
 void printName(dataName data, int pos) {
   if (data.redText)
     matrix.setTextColor(matrix.AdafruitColor(255, 0, 0));
@@ -105,11 +124,11 @@ void loop2_task(void *pvParameter)
 {
   while (true) {
     if (is_wifi_connecting) {
-      
+
       splash_screen(count_c);
       vTaskDelay(500);
       count_c += 1;
-      if (count_c>8) count_c = 1;
+      if (count_c > 8) count_c = 1;
     } else {
       vTaskDelay(1000);
       if (is_update) {
@@ -123,8 +142,58 @@ void loop2_task(void *pvParameter)
 long prev_t;
 long prev_timeStamp;
 
+void show_ip() {
+  matrix.black();
+  matrix.setTextColor(matrix.AdafruitColor(255, 0, 0));
+
+  matrix.setCursor(1, 1);
+  matrix.print(WiFi.localIP());
+
+  vTaskDelay(3000);
+
+}
+
+void update_eeprom() {
+  EEPROM.writeByte(0,0xED);
+  EEPROM.writeByte(1,serverCMI.length());
+  for (int i=0; i<serverCMI.length(); i++) {
+    EEPROM.writeChar(2+i,serverCMI[i]);
+  }
+  EEPROM.writeByte(2+serverCMI.length(),0);
+  EEPROM.commit();
+  
+}
+
+
+String read_from_eeprom() {
+  int l = EEPROM.readByte(1);
+  char s[17];
+  if (l>16) return "";
+  
+  for (int i=0; i<l; i++) {
+    s[i] = EEPROM.readChar(2+i);
+  }
+  s[l] = 0;
+  return s;
+}
+
 void setup() {
   Serial.begin(115200);
+
+  if (!EEPROM.begin(255)) {
+    Serial.println("Failed to initialise EEPROM");
+    Serial.println("Restarting...");
+    delay(1000);
+    ESP.restart();
+  }
+  if (EEPROM.readByte(0) == 0xED) {
+    serverCMI = read_from_eeprom();
+  } else {
+    
+    update_eeprom();
+  }
+  
+
   //matrix.setBrightness(255);
   is_update = true;
   is_wifi_connecting = true;
@@ -147,9 +216,24 @@ void setup() {
   wifiManager.autoConnect("Bang LED 01");
   is_wifi_connecting = false;
 
+  show_ip();
 
   Serial.println("OK");
   prev_t = millis();
+
+  server.on("/", handleRoot);
+
+  server.on("/set_host", []() {
+    if (server.argName(0) == "ip") {
+      serverCMI = server.arg(0);
+      update_eeprom();
+    }
+    server.send(200, "text/plain", "update server ip = " + serverCMI);
+  });
+
+  server.onNotFound(handleNotFound);
+
+  server.begin();
 
 }
 
@@ -157,7 +241,7 @@ void setup() {
 void loop() {
   if ((WiFi.status() == WL_CONNECTED) && (millis() - prev_t > 1000)) {
     HTTPClient http;
-    http.begin("http://192.168.1.56/get_last_info.php");
+    http.begin("http://" + serverCMI + "/get_last_info.php");
     int httpCode = http.GET();
 
     if (httpCode > 0) {
@@ -197,4 +281,5 @@ void loop() {
     prev_t = millis();
 
   }
+  server.handleClient();
 }
